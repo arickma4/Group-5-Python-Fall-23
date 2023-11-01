@@ -13,3 +13,5 @@ while Run:
             Run = False
         if event.type == KEYDOWN and K_ESCAPE:
             Run = False
+pygame.quit()
+sys.exit()
