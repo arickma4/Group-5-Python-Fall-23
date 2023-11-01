@@ -6,11 +6,10 @@ pygame.init()
 windowSurface = pygame.display.set_mode((0, 0))
 pygame.display.set_caption('Jets! V0')
 # run the game loop
-while True:
+Run = True
+while Run:
     for event in pygame.event.get():
         if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
+            Run = False
         if event.type == KEYDOWN and K_ESCAPE:
-            pygame.quit()
-            sys.exit()
+            Run = False
