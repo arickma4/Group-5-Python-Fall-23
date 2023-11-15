@@ -26,7 +26,7 @@ enemyX = []
 enemyY = []
 enemyX_co = []
 enemyY_co = []
-spawn = 10
+spawn = 30
 for i in range(spawn):
     enemy_icon.append(pygame.image.load('enemy(1).png'))
     enemyX.append(random.randint(0, 735))
@@ -103,11 +103,11 @@ while running:
     # enemy co-ordinates
     for i in range(spawn):
         enemyX[i] += enemyX_co[i]
-        if enemyX[i] <= 0:
-            enemyX_co[i] = enemyX_co[i] * -1.1
-            enemyY[i] += enemyY_co[i]
-        elif enemyX[i] >= 736:
-            enemyX_co[i] = enemyX_co[i] * -1.1
+        if enemyX[i] <= 0 or enemyX[i] >= 736:
+            if abs(enemyX_co[i]) < 5:
+              enemyX_co[i] = enemyX_co[i] * -1.1
+            else:
+              enemyX_co[i] = enemyX_co[i] * -1
             enemyY[i] += enemyY_co[i]
 
         # collision
