@@ -31,14 +31,14 @@ for i in range(spawn):
     enemy_icon.append(pygame.image.load('enemy(1).png'))
     enemyX.append(random.randint(0, 735))
     enemyY.append(random.randint(50, 150))
-    enemyX_co.append(0.5)
+    enemyX_co.append(1)
     enemyY_co.append(40)
 # bullet
 bullet_icon = pygame.image.load('bullet(1).png')
 bulletX = 0
 bulletY = 630
 bulletX_co = 0
-bulletY_co = 4
+bulletY_co = 6
 bullet_state = 'reload'
 
 
@@ -75,9 +75,9 @@ while running:
         # checking keys
         if task.type == pygame.KEYDOWN:
             if task.key == pygame.K_LEFT:
-                playerX_co = -0.6
+                playerX_co = -2
             if task.key == pygame.K_RIGHT:
-                playerX_co = 0.6
+                playerX_co = 2
             if task.key == pygame.K_SPACE:
                 if bullet_state == 'reload':
                     bulletX = playerX
@@ -104,10 +104,10 @@ while running:
     for i in range(spawn):
         enemyX[i] += enemyX_co[i]
         if enemyX[i] <= 0:
-            enemyX_co[i] = 0.5
+            enemyX_co[i] = enemyX_co[i] * -1.1
             enemyY[i] += enemyY_co[i]
         elif enemyX[i] >= 736:
-            enemyX_co[i] = -0.5
+            enemyX_co[i] = enemyX_co[i] * -1.1
             enemyY[i] += enemyY_co[i]
 
         # collision
