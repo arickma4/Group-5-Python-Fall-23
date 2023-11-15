@@ -1,90 +1,135 @@
-
-ALIEN_SPEED = 2  # Smaller is faster
-ALIEN_COUNT = 3
-
-
-
-
 import pygame
 import random
-import sys
-from pygame.locals import QUIT
+import math
 
-# Initialize Pygame and set up the display
 pygame.init()
-DISPLAYSURF = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-pygame.display.set_caption('Shoot the Aliens!')
-WIDTH, HEIGHT = DISPLAYSURF.get_size()
-GAME_OVER_FONT = pygame.font.SysFont('comicsans', 100)
 
-# Load and resize images
-SPACESHIP_ORIG = pygame.image.load('spaceship.png').convert_alpha()
-ALIEN_ORIG = pygame.image.load('alien.png').convert_alpha()
-SPACESHIP = pygame.transform.scale(SPACESHIP_ORIG, (50, 50))
-ALIEN = pygame.transform.scale(ALIEN_ORIG, (50, 50))
+# creating screen
+screen = pygame.display.set_mode((800, 800))
 
-# Variables
-player_x, player_y = WIDTH // 2, HEIGHT - 100
-aliens = [(random.randint(0, WIDTH), random.randint(-HEIGHT, 0))
-          for _ in range(ALIEN_COUNT)]
-bullets = []
+# Title and icon
+pygame.display.set_caption('Space Invader')
+icon = pygame.image.load('rocket(1).png')
+pygame.display.set_icon(icon)
+running = True
+# background
+background_img = pygame.image.load('space_bg.jpg')
+# Player
+player_icon = pygame.image.load('spaceship(1).png')
+playerX = 360
+playerY = 630
+playerX_co = 0
+playerY_co = 0
+# enemy
+enemy_icon = []
+enemyX = []
+enemyY = []
+enemyX_co = []
+enemyY_co = []
+spawn = 10
+for i in range(spawn):
+    enemy_icon.append(pygame.image.load('enemy(1).png'))
+    enemyX.append(random.randint(0, 735))
+    enemyY.append(random.randint(50, 150))
+    enemyX_co.append(0.5)
+    enemyY_co.append(40)
+# bullet
+bullet_icon = pygame.image.load('bullet(1).png')
+bulletX = 0
+bulletY = 630
+bulletX_co = 0
+bulletY_co = 4
+bullet_state = 'reload'
 
-# Main loop
-clock = pygame.time.Clock()
-game_over = False
-while True:
-  clock.tick(30)
-  for event in pygame.event.get():
-    if event.type == QUIT or (event.type == pygame.KEYDOWN
-                              and event.key == pygame.K_ESCAPE):
-      pygame.quit()
-      sys.exit()
 
-  if not game_over:
+def player(x, y):
+    screen.blit(player_icon, (x, y))
 
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT]:
-      player_x -= 5
-    if keys[pygame.K_RIGHT]:
-      player_x += 5
-    if keys[pygame.K_SPACE]:
-      bullets.append([player_x, player_y])
 
-    # Update bullets and aliens
-    bullets = [[x, y - 5] for x, y in bullets if y > 0]
-    aliens = [(x, y + ALIEN_SPEED) if y < HEIGHT else
-              (random.randint(0, WIDTH), 0) for x, y in aliens]
+def enemy(x, y, i):
+    screen.blit(enemy_icon[i], (x, y))
 
-    # Collision check: bullets and aliens
-    for ax, ay in aliens:
-      for bx, by in bullets:
-        if ax < bx < ax + 50 and ay < by < ay + 50:
-          if (ax, ay) in aliens:
-            aliens.remove((ax, ay))
-            aliens.append((random.randint(0, WIDTH), 0))
-          if (bx, by) in bullets:
-            bullets.remove([bx, by])
 
-    # Collision check: spaceship and aliens
-    for ax, ay in aliens:
-      if player_x < ax < player_x + 50 and player_y < ay < player_y + 50:
-        game_over = True
-        break
+def fire_bullet(x, y):
+    global bullet_state
+    bullet_state = 'fire'
+    screen.blit(bullet_icon, (x + 16, y + 10))
 
-    # Drawing
-    DISPLAYSURF.fill((0, 0, 0))
-    DISPLAYSURF.blit(SPACESHIP, (player_x, player_y))
-    for ax, ay in aliens:
-      DISPLAYSURF.blit(ALIEN, (ax, ay))
-    for bx, by in bullets:
-      pygame.draw.rect(DISPLAYSURF, (255, 0, 0), (bx, by, 5, 10))
 
-    pygame.display.update()
+def isCollision(enemyX, enemyY, bulletX, bulletY):
+    distance = math.sqrt((math.pow(enemyX - bulletX, 2)) + (math.pow(enemyY - bulletY, 2)))
+    if distance < 27:
+        return True
+    else:
+        return False
 
-  else:
-    game_over_label = GAME_OVER_FONT.render("Game Over", 1, (255, 0, 0))
-    DISPLAYSURF.blit(game_over_label,
-                     (WIDTH // 2 - game_over_label.get_width() // 2,
-                      HEIGHT // 2 - game_over_label.get_height() // 2))
+
+# game loop
+while running:
+
+    screen.fill((0, 0, 0))
+    screen.blit(background_img, (0, 0))
+    for task in pygame.event.get():
+        if task.type == pygame.QUIT:
+            running = False
+        # checking keys
+        if task.type == pygame.KEYDOWN:
+            if task.key == pygame.K_LEFT:
+                playerX_co = -0.6
+            if task.key == pygame.K_RIGHT:
+                playerX_co = 0.6
+            if task.key == pygame.K_SPACE:
+                if bullet_state == 'reload':
+                    bulletX = playerX
+                    fire_bullet(bulletX, bulletY)
+
+        if task.type == pygame.KEYUP:
+            if task.key == pygame.K_LEFT or task.key == pygame.K_RIGHT:
+                playerX_co = 0
+            if task.key == pygame.K_UP or task.key == pygame.K_DOWN:
+                playerY_co = 0
+
+    # player
+    playerX += playerX_co
+    if playerX <= 0:
+        playerX = 0
+    elif playerX >= 736:
+        playerX = 736
+    if playerY <= 0:
+        playerY = 0
+    elif playerY >= 736:
+        playerY = 736
+
+    # enemy co-ordinates
+    for i in range(spawn):
+        enemyX[i] += enemyX_co[i]
+        if enemyX[i] <= 0:
+            enemyX_co[i] = 0.5
+            enemyY[i] += enemyY_co[i]
+        elif enemyX[i] >= 736:
+            enemyX_co[i] = -0.5
+            enemyY[i] += enemyY_co[i]
+
+        # collision
+        collision = isCollision(enemyX[i], enemyY[i], bulletX, bulletY)
+        if collision:
+            bulletY = 630
+            bullet_state = 'reload'
+            enemyX[i] = random.randint(0, 735)
+            enemyY[i] = random.randint(50, 150)
+            spawn -= 1
+            if spawn == 0:
+                running = False
+        enemy(enemyX[i], enemyY[i], i)
+
+    # bullet movements
+    if bulletY <= 0:
+        bulletY = 630
+        bullet_state = 'reload'
+    if bullet_state == 'fire':
+        fire_bullet(bulletX, bulletY)
+        bulletY -= bulletY_co
+
+    player(playerX, playerY)
 
     pygame.display.update()
