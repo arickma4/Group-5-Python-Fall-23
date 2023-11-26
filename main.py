@@ -1,6 +1,8 @@
 import pygame
 import random
 import math
+import sys
+import pygame._sdl2.controller
 
 pygame.init()
 
@@ -41,6 +43,14 @@ bulletX_co = 0
 bulletY_co = 6
 bullet_state = 'reload'
 
+#Controller init
+pygame._sdl2.controller.init()
+for x in range(pygame.joystick.get_count()):
+    if pygame._sdl2.controller.is_controller(x):
+        ABXY = pygame._sdl2.controller.Controller(x)
+
+#Audio Init
+Bang = pygame.mixer.Sound('Bang.mp3')
 
 def player(x, y):
     screen.blit(player_icon, (x, y))
@@ -72,7 +82,47 @@ while running:
     for task in pygame.event.get():
         if task.type == pygame.QUIT:
             running = False
-        # checking keys
+        # checking keys, controller, and mouse
+        mrx, mry = pygame.mouse.get_rel()
+        if mrx > 0 or mry > 0:
+          mousex, mousey = pygame.mouse.get_pos()
+          playerX = mousex - 30
+        if pygame.mouse.get_pressed()[0]:
+                if bullet_state == 'reload':
+                    bulletX = playerX
+                    fire_bullet(bulletX, bulletY)
+        #if pygame.controller 
+        if "ControllerButtonDown" in str((pygame.event.event_name(task.type))):
+            if task.dict['button'] == 14:
+                playerX_co = 2
+            if task.dict['button'] == 13:
+                playerX_co = -2
+            if task.dict['button'] == 0:
+              if bullet_state == 'reload':
+                    bulletX = playerX
+                    fire_bullet(bulletX, bulletY)
+        if "ControllerAxisMotion" in str((pygame.event.event_name(task.type))):
+            if task.dict["axis"] == 4:
+                if task.dict["value"] > 1:
+                    playerX_co = -(task.dict["value"])/10000
+                else:
+                    playerX_co = 0
+            if task.dict["axis"] == 5:
+                if task.dict["value"] > 1:
+                    playerX_co = (task.dict["value"])/10000
+                else:
+                    playerX_co = 0
+            if task.dict["axis"] == 0:
+                if task.dict["value"] > 10000:
+                    playerX_co = (task.dict["value"])/5000
+                elif task.dict["value"] < -10000:
+                    playerX_co = (task.dict["value"])/5000
+                else:
+                    playerX_co = 0
+        
+        if "ControllerButtonUp" in str((pygame.event.event_name(task.type))) and task.dict['button'] != 0:
+            playerX_co = 0
+
         if task.type == pygame.KEYDOWN:
             if task.key == pygame.K_LEFT:
                 playerX_co = -2
@@ -80,6 +130,7 @@ while running:
                 playerX_co = 2
             if task.key == pygame.K_SPACE:
                 if bullet_state == 'reload':
+                    pygame.mixer.Sound.play(Bang)
                     bulletX = playerX
                     fire_bullet(bulletX, bulletY)
 
@@ -133,3 +184,7 @@ while running:
     player(playerX, playerY)
 
     pygame.display.update()
+    
+
+pygame.quit()
+sys.exit()
