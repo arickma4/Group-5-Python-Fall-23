@@ -28,7 +28,7 @@ enemyX = []
 enemyY = []
 enemyX_co = []
 enemyY_co = []
-spawn = 30
+spawn = 20
 for i in range(spawn):
     enemy_icon.append(pygame.image.load('Alien Ship.png'))
     enemyX.append(random.randint(0, 735))
