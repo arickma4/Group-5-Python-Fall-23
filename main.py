@@ -86,9 +86,13 @@ def isCollision(enemyX, enemyY, bulletX, bulletY):
 
 # game loop
 while running:
-    Score -= 10
     screen.fill((0, 0, 0))
-    screen.blit(background_img, ((screen.get_width())/4, 0))
+    screen.blit(background_img, ((screen.get_width())/4, 0))    
+    ScoreT = fontS.render(str(Score), True, (240,0,0))
+    ScoreR = ScoreT.get_rect()
+    ScoreR.center = ((screen.get_width()/2), 40)
+    screen.blit(ScoreT, ScoreR)
+    Score -= 10
     for task in pygame.event.get():
         if task.type == pygame.QUIT:
             running = False
