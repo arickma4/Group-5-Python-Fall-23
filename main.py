@@ -10,14 +10,14 @@ pygame.init()
 screen = pygame.display.set_mode((800, 800))
 
 # Title and icon
-pygame.display.set_caption('Space Invader')
+pygame.display.set_caption('Jets!')
 icon = pygame.image.load('rocket(1).png')
 pygame.display.set_icon(icon)
 running = True
 # background
 background_img = pygame.image.load('space_bg.jpg')
 # Player
-player_icon = pygame.image.load('spaceship(1).png')
+player_icon = pygame.image.load('Jet.png')
 playerX = 360
 playerY = 630
 playerX_co = 0
@@ -30,7 +30,7 @@ enemyX_co = []
 enemyY_co = []
 spawn = 30
 for i in range(spawn):
-    enemy_icon.append(pygame.image.load('enemy(1).png'))
+    enemy_icon.append(pygame.image.load('Alien Ship.png'))
     enemyX.append(random.randint(0, 735))
     enemyY.append(random.randint(50, 150))
     enemyX_co.append(1)
@@ -51,6 +51,7 @@ for x in range(pygame.joystick.get_count()):
 
 #Audio Init
 Bang = pygame.mixer.Sound('Bang.mp3')
+Boom = pygame.mixer.Sound('Boom.mp3')
 
 def player(x, y):
     screen.blit(player_icon, (x, y))
@@ -89,6 +90,7 @@ while running:
           playerX = mousex - 30
         if pygame.mouse.get_pressed()[0]:
                 if bullet_state == 'reload':
+                    pygame.mixer.Sound.play(Bang)
                     bulletX = playerX
                     fire_bullet(bulletX, bulletY)
         #if pygame.controller 
@@ -99,6 +101,7 @@ while running:
                 playerX_co = -2
             if task.dict['button'] == 0:
               if bullet_state == 'reload':
+                    pygame.mixer.Sound.play(Bang)
                     bulletX = playerX
                     fire_bullet(bulletX, bulletY)
         if "ControllerAxisMotion" in str((pygame.event.event_name(task.type))):
@@ -164,6 +167,7 @@ while running:
         # collision
         collision = isCollision(enemyX[i], enemyY[i], bulletX, bulletY)
         if collision:
+            pygame.mixer.Sound.play(Boom)
             bulletY = 630
             bullet_state = 'reload'
             enemyX[i] = random.randint(0, 735)
