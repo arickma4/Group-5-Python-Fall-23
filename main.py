@@ -9,47 +9,28 @@ pygame.init()
 
 # creating screen
 screen = pygame.display.set_mode((0, 0))
-#Font for endgame
+
+#Fonts and Text for endgame
 fontL = pygame.font.Font('OCR.ttf', 50)
 fontS = pygame.font.Font('OCR.ttf', 30)
 WinT = fontL.render('Congrats! You Won!', True, (240,0,0))
 LoseT = fontL.render('Game Over', True, (240,0,0))
-#LoseT = font.render('Game Over', True, green, blue)
-#WinT = font.render('Congrats!', True, green, blue)
-# Title and icon
+
+#Title and pictures init
 pygame.display.set_caption('Jets!')
 icon = pygame.image.load('rocket(1).png')
-pygame.display.set_icon(icon)
-running = True
-# background
 background_img = pygame.image.load('Background.png')
-# Player
 player_icon = pygame.image.load('Jet.png')
-playerX = (screen.get_width()/2)
-playerY = 630
-playerX_co = 0
-playerY_co = 0
-# enemy
-enemy_icon = []
-enemyX = []
-enemyY = []
-enemyX_co = []
-enemyY_co = []
-spawn = 20
-Score = 100000
-for i in range(spawn):
-    enemy_icon.append(pygame.image.load('Alien Ship.png'))
-    enemyX.append(random.randint(((screen.get_width()/4)), ((screen.get_width()/4)*3)))
-    enemyY.append(random.randint(50, 150))
-    enemyX_co.append(1)
-    enemyY_co.append(40)
-# bullet
+alien_icon = pygame.image.load('Alien Ship.png')
 bullet_icon = pygame.image.load('bullet(1).png')
-bulletX = 0
-bulletY = 630
-bulletX_co = 0
-bulletY_co = 6
-bullet_state = 'reload'
+pygame.display.set_icon(icon)
+
+#Audio Init
+Bang = pygame.mixer.Sound('Bang.mp3')
+Boom = pygame.mixer.Sound('Boom.mp3')
+
+#Main run variable
+running = True
 
 #Controller init
 pygame._sdl2.controller.init()
@@ -57,25 +38,56 @@ for x in range(pygame.joystick.get_count()):
     if pygame._sdl2.controller.is_controller(x):
         ABXY = pygame._sdl2.controller.Controller(x)
 
-#Audio Init
-Bang = pygame.mixer.Sound('Bang.mp3')
-Boom = pygame.mixer.Sound('Boom.mp3')
+#Sets the base variables for every run
+def run_variables():
+    global playerX, playerY, playerX_co, playerY_co, enemy_icon, enemyX, enemyY, enemyX_co, enemyY_co, spawn, Score, enemy_icon, bulletX, bulletY, bulletX_co, bulletY_co, bullet_state
+    # Player
+    playerX = (screen.get_width()/2)
+    playerY = 630
+    playerX_co = 0
+    playerY_co = 0
+    # enemy
+    enemy_icon = []
+    enemyX = []
+    enemyY = []
+    enemyX_co = []
+    enemyY_co = []
+    #How many are spawning
+    spawn = 20
+    #Max Score (-10 each frame)
+    Score = 100000
+    #Cords Genorator for enemies
+    for i in range(spawn):
+        enemy_icon.append(alien_icon)
+        enemyX.append(random.randint(((screen.get_width()/4)), (((screen.get_width()/4)*3)-15)))
+        enemyY.append(random.randint(50, 150))
+        enemyX_co.append(1)
+        enemyY_co.append(40)
+    # bullet
+    bulletX = 0
+    bulletY = 630
+    bulletX_co = 0
+    bulletY_co = 6
+    bullet_state = 'reload'
 
+#immediately runs that because it is the start of the game 
+run_variables()
 
+#Player blit function
 def player(x, y):
     screen.blit(player_icon, (x, y))
 
-
+#Enemy blit function
 def enemy(x, y, i):
     screen.blit(enemy_icon[i], (x, y))
 
-
+#Bullet blit function
 def fire_bullet(x, y):
     global bullet_state
     bullet_state = 'fire'
     screen.blit(bullet_icon, (x + 16, y + 10))
 
-
+#Bullet collision function
 def isCollision(enemyX, enemyY, bulletX, bulletY):
     distance = math.sqrt((math.pow(enemyX - bulletX, 2)) + (math.pow(enemyY - bulletY, 2)))
     if distance < 27:
@@ -86,27 +98,34 @@ def isCollision(enemyX, enemyY, bulletX, bulletY):
 
 # game loop
 while running:
-    screen.fill((0, 0, 0))
-    screen.blit(background_img, ((screen.get_width())/4, 0))    
+    #Instead of flip, we clear the screen
+    screen.fill(("black"))
+    screen.blit(background_img, ((screen.get_width())/4, 0))   
+    #Score renderer 
     ScoreT = fontS.render(str(Score), True, (240,0,0))
     ScoreR = ScoreT.get_rect()
-    ScoreR.center = ((screen.get_width()/2), 40)
+    ScoreR.center = (((screen.get_width()/2)+30), 40)
     screen.blit(ScoreT, ScoreR)
+    #Score Subtractor
     Score -= 10
+    #Main task Queue
     for task in pygame.event.get():
         if task.type == pygame.QUIT:
             running = False
-        # checking keys, controller, and mouse
+
+        #Mouse left and right
         mrx, mry = pygame.mouse.get_rel()
-        if mrx > 0 or mry > 0:
+        if mrx != 0 or mry != 0:
           mousex, mousey = pygame.mouse.get_pos()
           playerX = mousex - 30
+        #Mouse buttons
         if pygame.mouse.get_pressed()[0]:
                 if bullet_state == 'reload':
                     pygame.mixer.Sound.play(Bang)
                     bulletX = playerX
                     fire_bullet(bulletX, bulletY)
-        #if pygame.controller 
+
+        #Controller buttons
         if "ControllerButtonDown" in str((pygame.event.event_name(task.type))):
             if task.dict['button'] == 14:
                 playerX_co = 2
@@ -117,7 +136,9 @@ while running:
                     pygame.mixer.Sound.play(Bang)
                     bulletX = playerX
                     fire_bullet(bulletX, bulletY)
+        #Controller left and right
         if "ControllerAxisMotion" in str((pygame.event.event_name(task.type))):
+            #Triggers
             if task.dict["axis"] == 4:
                 if task.dict["value"] > 1:
                     playerX_co = -(task.dict["value"])/10000
@@ -128,6 +149,7 @@ while running:
                     playerX_co = (task.dict["value"])/10000
                 else:
                     playerX_co = 0
+            #Left Joystick
             if task.dict["axis"] == 0:
                 if task.dict["value"] > 10000:
                     playerX_co = (task.dict["value"])/5000
@@ -135,10 +157,11 @@ while running:
                     playerX_co = (task.dict["value"])/5000
                 else:
                     playerX_co = 0
-        
+        #Clears the button if you let go
         if "ControllerButtonUp" in str((pygame.event.event_name(task.type))) and task.dict['button'] != 0:
             playerX_co = 0
 
+        #Keyboard buttons
         if task.type == pygame.KEYDOWN:
             if task.key == pygame.K_LEFT:
                 playerX_co = -2
@@ -149,28 +172,25 @@ while running:
                     pygame.mixer.Sound.play(Bang)
                     bulletX = playerX
                     fire_bullet(bulletX, bulletY)
-
+            #Escape exits the game
+            if task.key == pygame.K_ESCAPE:
+                running = False
+        #Clears the key if you let go
         if task.type == pygame.KEYUP:
             if task.key == pygame.K_LEFT or task.key == pygame.K_RIGHT:
                 playerX_co = 0
-            if task.key == pygame.K_UP or task.key == pygame.K_DOWN:
-                playerY_co = 0
 
-    # player
+    #Player Boundaries
     playerX += playerX_co
     if playerX <= (screen.get_width()/4):
         playerX = (screen.get_width()/4)
-    elif playerX >= ((screen.get_width()/4)*3):
-        playerX = ((screen.get_width()/4)*3)
-    if playerY <= 0:
-        playerY = 0
-    elif playerY >= 736:
-        playerY = 736
+    elif playerX >= (((screen.get_width()/4)*3)-15):
+        playerX = (((screen.get_width()/4)*3)-15)
 
     # enemy co-ordinates
     for i in range(spawn):
         enemyX[i] += enemyX_co[i]
-        if enemyX[i] <= (screen.get_width()/4) or enemyX[i] >= ((screen.get_width()/4)*3):
+        if enemyX[i] <= (screen.get_width()/4) or enemyX[i] >= (((screen.get_width()/4)*3)-15):
             if abs(enemyX_co[i]) < 5:
               enemyX_co[i] = enemyX_co[i] * -1.1
             else:
@@ -180,7 +200,10 @@ while running:
         # collision
         Death = isCollision(enemyX[i], enemyY[i], playerX, playerY)
         if Death:
-            pygame.gfxdraw.box(screen, pygame.Rect(0,0,2000,2000), (0,0,0,200))
+            #You Lose! Death Screen
+            #Big transparent black box
+            pygame.gfxdraw.box(screen, pygame.Rect(0,0,20000,20000), (0,0,0,200))
+            #Drawing text
             LoseR = LoseT.get_rect()
             LoseR.center = ((screen.get_width()/2), 300)
             screen.blit(LoseT, LoseR)
@@ -195,50 +218,34 @@ while running:
             screen.blit(AgainT, AgainR)
             pause = True
             pygame.display.update()
+            #Waiting for input
             while pause:
                 for task in pygame.event.get():
                     if task.type == pygame.KEYDOWN:
                         if task.key == pygame.K_SPACE:
                             pause = False
                             #Again!
-                            background_img = pygame.image.load('Background.png')
-                            # Player
-                            player_icon = pygame.image.load('Jet.png')
-                            playerX = (screen.get_width()/2)
-                            playerY = 630
-                            playerX_co = 0
-                            playerY_co = 0
-                            # enemy
-                            enemy_icon = []
-                            spawn = 20
-                            enemyX = []
-                            enemyY = []
-                            enemyX_co = []
-                            enemyY_co = []
-                            Score = 100000
-                            for i in range(spawn):
-                                enemy_icon.append(pygame.image.load('Alien Ship.png'))
-                                enemyX.append(random.randint(((screen.get_width()/4)), ((screen.get_width()/4)*3)))
-                                enemyY.append(random.randint(50, 150))
-                                enemyX_co.append(1)
-                                enemyY_co.append(40)
-                            # bullet
-                            bullet_icon = pygame.image.load('bullet(1).png')
-                            bulletX = 0
-                            bulletY = 630
-                            bulletX_co = 0
-                            bulletY_co = 6
-                            bullet_state = "reload"
+                            run_variables()
+
+        #Collision detection variable
         collision = isCollision(enemyX[i], enemyY[i], bulletX, bulletY)
+
         if collision:
+            #If Alien is hit...
             pygame.mixer.Sound.play(Boom)
             bulletY = 630
             bullet_state = 'reload'
+            #If there is any more left in the spawn cue, spawn one of them now
             enemyX[i] = random.randint(((screen.get_width()/4)), ((screen.get_width()/4)*3))
             enemyY[i] = random.randint(50, 150)
+            #Remove 1 from the spawn cue
             spawn -= 1
+            #If there is nothing left in the spawn cue...
             if spawn == 0:
-                pygame.gfxdraw.box(screen, pygame.Rect(0,0,2000,2000), (0,0,0,200))
+                #You Win! Victory Screen
+                #Big transparent black box
+                pygame.gfxdraw.box(screen, pygame.Rect(0,0,20000,20000), (0,0,0,200))
+                #Drawing text
                 WinR = WinT.get_rect()
                 WinR.center = ((screen.get_width()/2), 300)
                 screen.blit(WinT, WinR)
@@ -253,42 +260,14 @@ while running:
                 screen.blit(AgainT, AgainR)
                 pause = True
                 pygame.display.update()
+                #Waiting for input
                 while pause:
                     for task in pygame.event.get():
                         if task.type == pygame.KEYDOWN:
                             if task.key == pygame.K_SPACE:
                                 pause = False
                                 #Again!
-                                background_img = pygame.image.load('Background.png')
-                                # Player
-                                player_icon = pygame.image.load('Jet.png')
-                                playerX = (screen.get_width()/2)
-                                playerY = 630
-                                playerX_co = 0
-                                playerY_co = 0
-                                # enemy
-                                enemy_icon = []
-                                enemyX = []
-                                enemyY = []
-                                enemyX_co = []
-                                enemyY_co = []
-                                spawn = 20
-                                Score = 100000
-                                for i in range(spawn):
-                                    enemy_icon.append(pygame.image.load('Alien Ship.png'))
-                                    enemyX.append(random.randint(((screen.get_width()/4)), ((screen.get_width()/4)*3)))
-                                    enemyY.append(random.randint(50, 150))
-                                    enemyX_co.append(1)
-                                    enemyY_co.append(40)
-                                # bullet
-                                bullet_icon = pygame.image.load('bullet(1).png')
-                                bulletX = 0
-                                bulletY = 630
-                                bulletX_co = 0
-                                bulletY_co = 6
-                                bullet_state = 'reload'
-
-
+                                run_variables()
         enemy(enemyX[i], enemyY[i], i)
 
     # bullet movements
@@ -299,10 +278,11 @@ while running:
         fire_bullet(bulletX, bulletY)
         bulletY -= bulletY_co
 
+    #Player movements
     player(playerX, playerY)
 
     pygame.display.update()
     
-
+#if run == False...
 pygame.quit()
 sys.exit()
