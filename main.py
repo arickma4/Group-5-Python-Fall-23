@@ -210,20 +210,19 @@ while running:
             LoseR = LoseT.get_rect()
             LoseR.center = ((screen.get_width()/2), 300)
             screen.blit(LoseT, LoseR)
-            Score = str(Score)
-            ScoreT = fontS.render('Your Score was '+(-1*Score), True, (240,0,0))
-            ScoreR = ScoreT.get_rect()
-            ScoreR.center = ((screen.get_width()/2), 400)
-            #screen.blit(ScoreT, ScoreR)
+            pause = True
+            pygame.display.update()
+            pygame.time.wait(1000)
             AgainT = fontS.render('Press Any Key to play again', True, (0,100,0))
             AgainR = AgainT.get_rect()
             AgainR.center = ((screen.get_width()/2), 500)
             screen.blit(AgainT, AgainR)
-            pause = True
             pygame.display.update()
             #Waiting for input
             LEvent = ""
+            Event = ""
             while pause:
+                Event=LEvent
                 LEvent = str((pygame.event.event_name(task.type)))
                 for task in pygame.event.get():
                     if task.type == pygame.QUIT:
@@ -233,10 +232,12 @@ while running:
                         if task.key == pygame.K_ESCAPE:
                             pause = False
                             running = False
-                if LEvent == "JoyButtonDown" or LEvent == "TextInput" or LEvent == "MouseButtonDown" or LEvent == "ControllerButtonDown":
-                    pause = False
-                    #Again!
-                    run_variables()
+                    if LEvent != "" and Event != "" and LEvent != Event and LEvent == "JoyButtonDown" or LEvent == "TextInput" or LEvent == "MouseButtonDown" or LEvent == "ControllerButtonDown":
+                        pause = False
+                        #Again!
+                        run_variables()
+                        print(LEvent)
+                        print(Event)
 
         #Collision detection variable
         collision = isCollision(enemyX[i], enemyY[i], bulletX, bulletY)
@@ -247,7 +248,7 @@ while running:
             bulletY = screen.get_height()
             bullet_state = 'reload'
             #If there is any more left in the spawn cue, spawn one of them now
-            enemyX[i] = random.randint(((screen.get_width()/4)), ((screen.get_width()/4)*3))
+            enemyX[i] = random.randint(((screen.get_width()/4)), (((screen.get_width()/4)*3)-15))
             enemyY[i] = random.randint(50, 150)
             #Remove 1 from the spawn cue
             spawn -= 1
@@ -277,6 +278,8 @@ while running:
                 ScoreR = ScoreT.get_rect()
                 ScoreR.center = ((screen.get_width()/2), 400)
                 screen.blit(ScoreT, ScoreR)
+                pygame.display.update()
+                pygame.time.wait(1000)
                 AgainT = fontS.render('Press Any Key to play again', True, (0,100,0))
                 AgainR = AgainT.get_rect()
                 AgainR.center = ((screen.get_width()/2), 500)
@@ -284,7 +287,9 @@ while running:
                 pause = True
                 pygame.display.update()
                 LEvent = ""
+                Event = ""
                 while pause:
+                    Event=LEvent
                     LEvent = str((pygame.event.event_name(task.type)))
                     for task in pygame.event.get():
                         if task.type == pygame.QUIT:
@@ -294,11 +299,12 @@ while running:
                             if task.key == pygame.K_ESCAPE:
                                 pause = False
                                 running = False
-                    if LEvent == "JoyButtonDown" or LEvent == "TextInput" or LEvent == "MouseButtonDown" or LEvent == "ControllerButtonDown":
-                        pause = False
-                        #Again!
-                        run_variables()
-    
+                        if LEvent != "" and Event != "" and LEvent != Event and LEvent == "JoyButtonDown" or LEvent == "TextInput" or LEvent == "MouseButtonDown" or LEvent == "ControllerButtonDown":
+                            pause = False
+                            #Again!
+                            run_variables()
+                        print(LEvent)
+                        print(Event)
 screen.fill((0, 0, 0))
 pygame.display.update()
 pygame.quit()
