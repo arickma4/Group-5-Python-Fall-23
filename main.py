@@ -11,25 +11,25 @@ pygame.init()
 screen = pygame.display.set_mode((0, 0))
 
 #Fonts and Text for endgame
-fontL = pygame.font.Font('OCR.ttf', 50)
-fontS = pygame.font.Font('OCR.ttf', 30)
+fontL = pygame.font.Font('Assets/OCR.ttf', 50)
+fontS = pygame.font.Font('Assets/OCR.ttf', 30)
 WinT = fontL.render('Congrats! You Won!', True, (240,0,0))
 LoseT = fontL.render('Game Over', True, (240,0,0))
 
 #Title and pictures init
-pygame.display.set_caption('Jets!')
-icon = pygame.image.load('Jets_icon.png')
-background_img = pygame.image.load('Background.png')
-player_icon = pygame.image.load('Jet.png')
-alien_icon = pygame.image.load('Alien Ship.png')
-bullet_icon = pygame.image.load('bullet.png')
-Explosion = pygame.image.load('Explosion.png')
+pygame.display.set_caption('Assets/Jets!')
+icon = pygame.image.load('Assets/Jets_icon.png')
+background_img = pygame.image.load('Assets/Background.png')
+player_icon = pygame.image.load('Assets/Jet.png')
+alien_icon = pygame.image.load('Assets/Alien Ship.png')
+bullet_icon = pygame.image.load('Assets/bullet.png')
+Explosion = pygame.image.load('Assets/Explosion.png')
 Explosions = []
 pygame.display.set_icon(icon)
 
 #Audio Init
-Bang = pygame.mixer.Sound('Bang.mp3')
-Boom = pygame.mixer.Sound('Boom.mp3')
+Bang = pygame.mixer.Sound('Assets/Bang.mp3')
+Boom = pygame.mixer.Sound('Assets/Boom.mp3')
 
 #Main run variable
 running = True
