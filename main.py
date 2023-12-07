@@ -123,6 +123,7 @@ while running:
                 if bullet_state == 'reload':
                     pygame.mixer.Sound.play(Bang)
                     bulletX = playerX
+                    bulletY = 630
                     fire_bullet(bulletX, bulletY)
 
         #Controller buttons
@@ -135,6 +136,7 @@ while running:
               if bullet_state == 'reload':
                     pygame.mixer.Sound.play(Bang)
                     bulletX = playerX
+                    bulletY = 630
                     fire_bullet(bulletX, bulletY)
         #Controller left and right
         if "ControllerAxisMotion" in str((pygame.event.event_name(task.type))):
@@ -170,6 +172,7 @@ while running:
             if task.key == pygame.K_SPACE:
                 if bullet_state == 'reload':
                     pygame.mixer.Sound.play(Bang)
+                    bulletY = 630
                     bulletX = playerX
                     fire_bullet(bulletX, bulletY)
             #Escape exits the game
@@ -208,24 +211,32 @@ while running:
             LoseR.center = ((screen.get_width()/2), 300)
             screen.blit(LoseT, LoseR)
             Score = str(Score)
-            ScoreT = fontS.render('Your Score was '+Score, True, (240,0,0))
+            ScoreT = fontS.render('Your Score was '+(-1*Score), True, (240,0,0))
             ScoreR = ScoreT.get_rect()
             ScoreR.center = ((screen.get_width()/2), 400)
-            screen.blit(ScoreT, ScoreR)
-            AgainT = fontS.render('Press Space to play again', True, (0,100,0))
+            #screen.blit(ScoreT, ScoreR)
+            AgainT = fontS.render('Press Any Key to play again', True, (0,100,0))
             AgainR = AgainT.get_rect()
             AgainR.center = ((screen.get_width()/2), 500)
             screen.blit(AgainT, AgainR)
             pause = True
             pygame.display.update()
             #Waiting for input
+            LEvent = ""
             while pause:
+                LEvent = str((pygame.event.event_name(task.type)))
                 for task in pygame.event.get():
+                    if task.type == pygame.QUIT:
+                        pause = False
+                        running = False
                     if task.type == pygame.KEYDOWN:
-                        if task.key == pygame.K_SPACE:
+                        if task.key == pygame.K_ESCAPE:
                             pause = False
-                            #Again!
-                            run_variables()
+                            running = False
+                if LEvent == "JoyButtonDown" or LEvent == "TextInput" or LEvent == "MouseButtonDown" or LEvent == "ControllerButtonDown":
+                    pause = False
+                    #Again!
+                    run_variables()
 
         #Collision detection variable
         collision = isCollision(enemyX[i], enemyY[i], bulletX, bulletY)
@@ -233,41 +244,13 @@ while running:
         if collision:
             #If Alien is hit...
             pygame.mixer.Sound.play(Boom)
-            bulletY = 630
+            bulletY = screen.get_height()
             bullet_state = 'reload'
             #If there is any more left in the spawn cue, spawn one of them now
             enemyX[i] = random.randint(((screen.get_width()/4)), ((screen.get_width()/4)*3))
             enemyY[i] = random.randint(50, 150)
             #Remove 1 from the spawn cue
             spawn -= 1
-            #If there is nothing left in the spawn cue...
-            if spawn == 0:
-                #You Win! Victory Screen
-                #Big transparent black box
-                pygame.gfxdraw.box(screen, pygame.Rect(0,0,20000,20000), (0,0,0,200))
-                #Drawing text
-                WinR = WinT.get_rect()
-                WinR.center = ((screen.get_width()/2), 300)
-                screen.blit(WinT, WinR)
-                Score = str(Score)
-                ScoreT = fontS.render('Your Score was '+Score, True, (240,0,0))
-                ScoreR = ScoreT.get_rect()
-                ScoreR.center = ((screen.get_width()/2), 400)
-                screen.blit(ScoreT, ScoreR)
-                AgainT = fontS.render('Press Space to play again', True, (0,100,0))
-                AgainR = AgainT.get_rect()
-                AgainR.center = ((screen.get_width()/2), 500)
-                screen.blit(AgainT, AgainR)
-                pause = True
-                pygame.display.update()
-                #Waiting for input
-                while pause:
-                    for task in pygame.event.get():
-                        if task.type == pygame.KEYDOWN:
-                            if task.key == pygame.K_SPACE:
-                                pause = False
-                                #Again!
-                                run_variables()
         enemy(enemyX[i], enemyY[i], i)
 
     # bullet movements
@@ -278,11 +261,45 @@ while running:
         fire_bullet(bulletX, bulletY)
         bulletY -= bulletY_co
 
-    #Player movements
     player(playerX, playerY)
 
     pygame.display.update()
+
+    #Win Mechanics
+    if spawn == 0 and Death == False:
+                screen.blit(background_img, ((screen.get_width())/4, 0)) 
+                pygame.gfxdraw.box(screen, pygame.Rect(0,0,2000,2000), (0,0,0,200))
+                WinR = WinT.get_rect()
+                WinR.center = ((screen.get_width()/2), 300)
+                screen.blit(WinT, WinR)
+                Score = str(Score)
+                ScoreT = fontS.render('Your Score was '+Score, True, (240,0,0))
+                ScoreR = ScoreT.get_rect()
+                ScoreR.center = ((screen.get_width()/2), 400)
+                screen.blit(ScoreT, ScoreR)
+                AgainT = fontS.render('Press Any Key to play again', True, (0,100,0))
+                AgainR = AgainT.get_rect()
+                AgainR.center = ((screen.get_width()/2), 500)
+                screen.blit(AgainT, AgainR)
+                pause = True
+                pygame.display.update()
+                LEvent = ""
+                while pause:
+                    LEvent = str((pygame.event.event_name(task.type)))
+                    for task in pygame.event.get():
+                        if task.type == pygame.QUIT:
+                            pause = False
+                            running = False
+                        if task.type == pygame.KEYDOWN:
+                            if task.key == pygame.K_ESCAPE:
+                                pause = False
+                                running = False
+                    if LEvent == "JoyButtonDown" or LEvent == "TextInput" or LEvent == "MouseButtonDown" or LEvent == "ControllerButtonDown":
+                        pause = False
+                        #Again!
+                        run_variables()
     
-#if run == False...
+screen.fill((0, 0, 0))
+pygame.display.update()
 pygame.quit()
 sys.exit()
