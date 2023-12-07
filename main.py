@@ -18,11 +18,13 @@ LoseT = fontL.render('Game Over', True, (240,0,0))
 
 #Title and pictures init
 pygame.display.set_caption('Jets!')
-icon = pygame.image.load('rocket(1).png')
+icon = pygame.image.load('Jets_icon.png')
 background_img = pygame.image.load('Background.png')
 player_icon = pygame.image.load('Jet.png')
 alien_icon = pygame.image.load('Alien Ship.png')
-bullet_icon = pygame.image.load('bullet(1).png')
+bullet_icon = pygame.image.load('bullet.png')
+Explosion = pygame.image.load('Explosion.png')
+Explosions = []
 pygame.display.set_icon(icon)
 
 #Audio Init
@@ -85,7 +87,7 @@ def enemy(x, y, i):
 def fire_bullet(x, y):
     global bullet_state
     bullet_state = 'fire'
-    screen.blit(bullet_icon, (x + 16, y + 10))
+    screen.blit(bullet_icon, (x + 32, y + 10))
 
 #Bullet collision function
 def isCollision(enemyX, enemyY, bulletX, bulletY):
@@ -205,6 +207,8 @@ while running:
         if Death:
             #You Lose! Death Screen
             #Big transparent black box
+            pygame.mixer.Sound.play(Boom)
+            screen.blit(Explosion, (playerX, 630))
             pygame.gfxdraw.box(screen, pygame.Rect(0,0,20000,20000), (0,0,0,200))
             #Drawing text
             LoseR = LoseT.get_rect()
@@ -245,6 +249,7 @@ while running:
         if collision:
             #If Alien is hit...
             pygame.mixer.Sound.play(Boom)
+            Explosions.append([5, (bulletX, (bulletY-35))])
             bulletY = screen.get_height()
             bullet_state = 'reload'
             #If there is any more left in the spawn cue, spawn one of them now
@@ -253,6 +258,13 @@ while running:
             #Remove 1 from the spawn cue
             spawn -= 1
         enemy(enemyX[i], enemyY[i], i)
+
+    for i in Explosions:
+        if i[0]<0:
+            Explosions.remove(i)
+        else:
+            screen.blit(Explosion, i[1])
+            i[0]-=.1
 
     # bullet movements
     if bulletY <= 0:
