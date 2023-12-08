@@ -14,9 +14,10 @@ screen = pygame.display.set_mode((0, 0))
 #Scale factor
 SF=screen.get_height()/900
 #Logical Processor Factor (Yeah, I had to go there)
-LPF=((math.sqrt(multiprocessing.cpu_count())/(SF**2))/(3/(math.sqrt(multiprocessing.cpu_count()))))
+LPF=(math.log((math.sqrt(multiprocessing.cpu_count())), SF*2))/(3/(math.sqrt(multiprocessing.cpu_count())))
 print(LPF)
 print((math.ceil((2/(LPF))))*10)
+print(math.log(50, SF*2))
 
 #Fonts and Text for endgame
 fontL = pygame.font.Font('Assets/OCR.ttf', int(50*SF))
@@ -42,8 +43,6 @@ pygame.display.set_icon(icon)
 #Starting x value
 FirstX = (screen.get_width()/2)-(background_img.get_width()/2)
 LastX= (screen.get_width()-FirstX)
-print(LastX)
-print(screen.get_width()/4)
 
 #Audio Init
 Bang = pygame.mixer.Sound('Assets/Bang.mp3')
@@ -82,8 +81,8 @@ def run_variables():
         enemy_icon.append(alien_icon)
         enemyX.append(random.randint(((screen.get_width()/4)), (((screen.get_width()/4)*3)-15)))
         enemyY.append(random.randint(50, 150))
-        enemyX_co.append(1/LPF)
-        enemyY_co.append(40)
+        enemyX_co.append(1/(LPF/SF**2))
+        enemyY_co.append(alien_icon.get_height())
     # bullet
     bulletX = 0
     bulletY = (screen.get_height()-170)
