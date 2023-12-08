@@ -82,13 +82,13 @@ def run_variables():
         enemy_icon.append(alien_icon)
         enemyX.append(random.randint((FirstX), (LastX-alien_icon.get_width())))
         enemyY.append(random.randint(50, 150))
-        enemyX_co.append(1/((LPF/SF**2)/(math.sqrt(1/SQLP))))
+        enemyX_co.append(1/((LPF*2/SF**2)/(1/(math.sqrt(1/SQLP)))))
         enemyY_co.append(alien_icon.get_height())
     # bullet
     bulletX = 0
     bulletY = (screen.get_height()-170)
     bulletX_co = 0
-    bulletY_co = ((6/(LPF**1.5))*(SF**3))
+    bulletY_co = ((6/(math.ceil(LPF)**1.1))*(SF**3))
     bullet_state = 'reload'
 
 #immediately runs that because it is the start of the game 
@@ -150,9 +150,9 @@ while running:
         #Controller buttons
         if "ControllerButtonDown" in str((pygame.event.event_name(task.type))):
             if task.dict['button'] == 14:
-                playerX_co = 2
+                playerX_co = 2/LPF
             if task.dict['button'] == 13:
-                playerX_co = -2
+                playerX_co = -2/LPF
             if task.dict['button'] == 0:
               if bullet_state == 'reload':
                     pygame.mixer.Sound.play(Bang)
@@ -175,9 +175,9 @@ while running:
             #Left Joystick
             if task.dict["axis"] == 0:
                 if task.dict["value"] > 10000:
-                    playerX_co = (task.dict["value"])/5000
+                    playerX_co = ((task.dict["value"])/5000)/LPF
                 elif task.dict["value"] < -10000:
-                    playerX_co = (task.dict["value"])/5000
+                    playerX_co = ((task.dict["value"])/5000)/LPF
                 else:
                     playerX_co = 0
         #Clears the button if you let go
@@ -255,10 +255,10 @@ while running:
                         if task.key == pygame.K_ESCAPE:
                             pause = False
                             running = False
-                    if LEvent != "" and Event != "" and LEvent != Event and LEvent == "JoyButtonDown" or LEvent == "TextInput" or LEvent == "MouseButtonDown" or LEvent == "ControllerButtonDown":
-                        pause = False
-                        #Again!
-                        run_variables()
+                if LEvent != "" and Event != "" and LEvent != Event and LEvent == "JoyButtonDown" or LEvent == "TextInput" or LEvent == "MouseButtonDown" or LEvent == "ControllerButtonDown":
+                    pause = False
+                    #Again!
+                    run_variables()
 
         #Collision detection variable
         collision = isCollision(enemyX[i], enemyY[i], bulletX, bulletY)
@@ -328,10 +328,10 @@ while running:
                             if task.key == pygame.K_ESCAPE:
                                 pause = False
                                 running = False
-                        if LEvent != "" and Event != "" and LEvent != Event and LEvent == "JoyButtonDown" or LEvent == "TextInput" or LEvent == "MouseButtonDown" or LEvent == "ControllerButtonDown":
-                            pause = False
-                            #Again!
-                            run_variables()
+                    if LEvent != "" and Event != "" and LEvent != Event and LEvent == "JoyButtonDown" or LEvent == "TextInput" or LEvent == "MouseButtonDown" or LEvent == "ControllerButtonDown":
+                        pause = False
+                        #Again!
+                        run_variables()
 screen.fill((0, 0, 0))
 pygame.display.update()
 
