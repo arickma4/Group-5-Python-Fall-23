@@ -4,26 +4,37 @@ import math
 import sys
 import pygame._sdl2.controller
 import pygame.gfxdraw
+import multiprocessing
 
 pygame.init()
 
 # creating screen
 screen = pygame.display.set_mode((0, 0))
 
+#Scale factor
+SF=screen.get_height()/900
+#Logical Processor Factor (Yeah, I had to go there)
+LPF=((math.sqrt(multiprocessing.cpu_count())/((SF**2)*1.5)))
+
 #Fonts and Text for endgame
-fontL = pygame.font.Font('Assets/OCR.ttf', 50)
-fontS = pygame.font.Font('Assets/OCR.ttf', 30)
+fontL = pygame.font.Font('Assets/OCR.ttf', int(50*SF))
+fontS = pygame.font.Font('Assets/OCR.ttf', int(30*SF))
 WinT = fontL.render('Congrats! You Won!', True, (240,0,0))
 LoseT = fontL.render('Game Over', True, (240,0,0))
 
 #Title and pictures init
-pygame.display.set_caption('Assets/Jets!')
+pygame.display.set_caption('Jets!')
 icon = pygame.image.load('Assets/Jets_icon.png')
 background_img = pygame.image.load('Assets/Background.png')
+background_img = pygame.transform.scale(background_img, (screen.get_height(), screen.get_height()))
 player_icon = pygame.image.load('Assets/Jet.png')
+player_icon = pygame.transform.scale(player_icon, ((player_icon.get_width()*SF),(player_icon.get_height()*SF)))
 alien_icon = pygame.image.load('Assets/Alien Ship.png')
+alien_icon = pygame.transform.scale(alien_icon, ((alien_icon.get_width()*SF),(alien_icon.get_height()*SF)))
 bullet_icon = pygame.image.load('Assets/bullet.png')
+bullet_icon = pygame.transform.scale(bullet_icon, ((bullet_icon.get_width()*SF),(bullet_icon.get_height()*SF)))
 Explosion = pygame.image.load('Assets/Explosion.png')
+Explosion = pygame.transform.scale(Explosion, ((Explosion.get_width()*SF),(Explosion.get_height()*SF)))
 Explosions = []
 pygame.display.set_icon(icon)
 
@@ -45,7 +56,7 @@ def run_variables():
     global playerX, playerY, playerX_co, playerY_co, enemy_icon, enemyX, enemyY, enemyX_co, enemyY_co, spawn, Score, enemy_icon, bulletX, bulletY, bulletX_co, bulletY_co, bullet_state
     # Player
     playerX = (screen.get_width()/2)
-    playerY = 630
+    playerY = (screen.get_height()-170)
     playerX_co = 0
     playerY_co = 0
     # enemy
@@ -57,19 +68,19 @@ def run_variables():
     #How many are spawning
     spawn = 20
     #Max Score (-10 each frame)
-    Score = 100000
+    Score = 1000000
     #Cords Genorator for enemies
     for i in range(spawn):
         enemy_icon.append(alien_icon)
         enemyX.append(random.randint(((screen.get_width()/4)), (((screen.get_width()/4)*3)-15)))
         enemyY.append(random.randint(50, 150))
-        enemyX_co.append(1)
+        enemyX_co.append(1/LPF)
         enemyY_co.append(40)
     # bullet
     bulletX = 0
-    bulletY = 630
+    bulletY = (screen.get_height()-170)
     bulletX_co = 0
-    bulletY_co = 6
+    bulletY_co = (6/LPF)
     bullet_state = 'reload'
 
 #immediately runs that because it is the start of the game 
@@ -109,7 +120,7 @@ while running:
     ScoreR.center = (((screen.get_width()/2)+30), 40)
     screen.blit(ScoreT, ScoreR)
     #Score Subtractor
-    Score -= 10
+    Score -= ((math.ceil((1/LPF)))*20)
     #Main task Queue
     for task in pygame.event.get():
         if task.type == pygame.QUIT:
@@ -125,7 +136,7 @@ while running:
                 if bullet_state == 'reload':
                     pygame.mixer.Sound.play(Bang)
                     bulletX = playerX
-                    bulletY = 630
+                    bulletY = (screen.get_height()-170)
                     fire_bullet(bulletX, bulletY)
 
         #Controller buttons
@@ -138,7 +149,7 @@ while running:
               if bullet_state == 'reload':
                     pygame.mixer.Sound.play(Bang)
                     bulletX = playerX
-                    bulletY = 630
+                    bulletY = (screen.get_height()-170)
                     fire_bullet(bulletX, bulletY)
         #Controller left and right
         if "ControllerAxisMotion" in str((pygame.event.event_name(task.type))):
@@ -174,7 +185,7 @@ while running:
             if task.key == pygame.K_SPACE:
                 if bullet_state == 'reload':
                     pygame.mixer.Sound.play(Bang)
-                    bulletY = 630
+                    bulletY = (screen.get_height()-170)
                     bulletX = playerX
                     fire_bullet(bulletX, bulletY)
             #Escape exits the game
@@ -196,7 +207,7 @@ while running:
     for i in range(spawn):
         enemyX[i] += enemyX_co[i]
         if enemyX[i] <= (screen.get_width()/4) or enemyX[i] >= (((screen.get_width()/4)*3)-15):
-            if abs(enemyX_co[i]) < 5:
+            if abs(enemyX_co[i]) < (5/LPF):
               enemyX_co[i] = enemyX_co[i] * -1.1
             else:
               enemyX_co[i] = enemyX_co[i] * -1
@@ -208,7 +219,7 @@ while running:
             #You Lose! Death Screen
             #Big transparent black box
             pygame.mixer.Sound.play(Boom)
-            screen.blit(Explosion, (playerX, 630))
+            screen.blit(Explosion, (playerX, (screen.get_height()-170)))
             pygame.gfxdraw.box(screen, pygame.Rect(0,0,20000,20000), (0,0,0,200))
             #Drawing text
             LoseR = LoseT.get_rect()
@@ -240,8 +251,6 @@ while running:
                         pause = False
                         #Again!
                         run_variables()
-                        print(LEvent)
-                        print(Event)
 
         #Collision detection variable
         collision = isCollision(enemyX[i], enemyY[i], bulletX, bulletY)
@@ -268,7 +277,7 @@ while running:
 
     # bullet movements
     if bulletY <= 0:
-        bulletY = 630
+        bulletY = (screen.get_height()-170)
         bullet_state = 'reload'
     if bullet_state == 'fire':
         fire_bullet(bulletX, bulletY)
@@ -315,8 +324,6 @@ while running:
                             pause = False
                             #Again!
                             run_variables()
-                        print(LEvent)
-                        print(Event)
 screen.fill((0, 0, 0))
 pygame.display.update()
 pygame.quit()
