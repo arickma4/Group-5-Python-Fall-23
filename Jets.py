@@ -14,7 +14,9 @@ screen = pygame.display.set_mode((0, 0))
 #Scale factor
 SF=screen.get_height()/900
 #Logical Processor Factor (Yeah, I had to go there)
-LPF=((math.sqrt(multiprocessing.cpu_count())/((SF**2)*1.5)))
+LPF=((math.sqrt(multiprocessing.cpu_count())/(SF**2))/(3/(math.sqrt(multiprocessing.cpu_count()))))
+print(LPF)
+print((math.ceil((2/(LPF))))*10)
 
 #Fonts and Text for endgame
 fontL = pygame.font.Font('Assets/OCR.ttf', int(50*SF))
@@ -35,8 +37,13 @@ bullet_icon = pygame.image.load('Assets/bullet.png')
 bullet_icon = pygame.transform.scale(bullet_icon, ((bullet_icon.get_width()*SF),(bullet_icon.get_height()*SF)))
 Explosion = pygame.image.load('Assets/Explosion.png')
 Explosion = pygame.transform.scale(Explosion, ((Explosion.get_width()*SF),(Explosion.get_height()*SF)))
-Explosions = []
 pygame.display.set_icon(icon)
+
+#Starting x value
+FirstX = (screen.get_width()/2)-(background_img.get_width()/2)
+LastX= (screen.get_width()-FirstX)
+print(LastX)
+print(screen.get_width()/4)
 
 #Audio Init
 Bang = pygame.mixer.Sound('Assets/Bang.mp3')
@@ -53,13 +60,14 @@ for x in range(pygame.joystick.get_count()):
 
 #Sets the base variables for every run
 def run_variables():
-    global playerX, playerY, playerX_co, playerY_co, enemy_icon, enemyX, enemyY, enemyX_co, enemyY_co, spawn, Score, enemy_icon, bulletX, bulletY, bulletX_co, bulletY_co, bullet_state
+    global playerX, playerY, playerX_co, playerY_co, enemy_icon, enemyX, enemyY, enemyX_co, enemyY_co, spawn, Score, enemy_icon, bulletX, bulletY, bulletX_co, bulletY_co, bullet_state, Explosions
     # Player
     playerX = (screen.get_width()/2)
     playerY = (screen.get_height()-170)
     playerX_co = 0
     playerY_co = 0
     # enemy
+    Explosions = []
     enemy_icon = []
     enemyX = []
     enemyY = []
@@ -113,14 +121,14 @@ def isCollision(enemyX, enemyY, bulletX, bulletY):
 while running:
     #Instead of flip, we clear the screen
     screen.fill(("black"))
-    screen.blit(background_img, ((screen.get_width())/4, 0))   
+    screen.blit(background_img, (FirstX, 0))   
     #Score renderer 
     ScoreT = fontS.render(str(Score), True, (240,0,0))
     ScoreR = ScoreT.get_rect()
-    ScoreR.center = (((screen.get_width()/2)+30), 40)
+    ScoreR.center = (((screen.get_width()/2)), 40)
     screen.blit(ScoreT, ScoreR)
     #Score Subtractor
-    Score -= ((math.ceil((1/LPF)))*20)
+    Score -= ((math.ceil((2/(LPF))))*10)
     #Main task Queue
     for task in pygame.event.get():
         if task.type == pygame.QUIT:
@@ -198,15 +206,15 @@ while running:
 
     #Player Boundaries
     playerX += playerX_co
-    if playerX <= (screen.get_width()/4):
-        playerX = (screen.get_width()/4)
-    elif playerX >= (((screen.get_width()/4)*3)-15):
-        playerX = (((screen.get_width()/4)*3)-15)
+    if playerX <= (FirstX):
+        playerX = (FirstX)
+    elif playerX >= (LastX-player_icon.get_width()):
+        playerX = (LastX-player_icon.get_width())
 
     # enemy co-ordinates
     for i in range(spawn):
         enemyX[i] += enemyX_co[i]
-        if enemyX[i] <= (screen.get_width()/4) or enemyX[i] >= (((screen.get_width()/4)*3)-15):
+        if enemyX[i] <= (FirstX) or enemyX[i] >= (LastX-alien_icon.get_width()):
             if abs(enemyX_co[i]) < (5/LPF):
               enemyX_co[i] = enemyX_co[i] * -1.1
             else:
@@ -326,5 +334,6 @@ while running:
                             run_variables()
 screen.fill((0, 0, 0))
 pygame.display.update()
+
 pygame.quit()
 sys.exit()
