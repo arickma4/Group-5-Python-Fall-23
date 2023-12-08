@@ -14,7 +14,8 @@ screen = pygame.display.set_mode((0, 0))
 #Scale factor
 SF=screen.get_height()/900
 #Logical Processor Factor (Yeah, I had to go there)
-LPF=(math.log((math.sqrt(multiprocessing.cpu_count())), SF*2))/(3/(math.sqrt(multiprocessing.cpu_count())))
+SQLP =(math.sqrt(multiprocessing.cpu_count()))
+LPF=(math.log(SQLP, SF*2))/(3/SQLP)
 print(LPF)
 print((math.ceil((2/(LPF))))*10)
 print(math.log(50, SF*2))
@@ -61,7 +62,7 @@ for x in range(pygame.joystick.get_count()):
 def run_variables():
     global playerX, playerY, playerX_co, playerY_co, enemy_icon, enemyX, enemyY, enemyX_co, enemyY_co, spawn, Score, enemy_icon, bulletX, bulletY, bulletX_co, bulletY_co, bullet_state, Explosions
     # Player
-    playerX = (screen.get_width()/2)
+    playerX = ((screen.get_width()/2)-(player_icon.get_width()/2))
     playerY = (screen.get_height()-170)
     playerX_co = 0
     playerY_co = 0
@@ -79,15 +80,15 @@ def run_variables():
     #Cords Genorator for enemies
     for i in range(spawn):
         enemy_icon.append(alien_icon)
-        enemyX.append(random.randint(((screen.get_width()/4)), (((screen.get_width()/4)*3)-15)))
+        enemyX.append(random.randint((FirstX), (LastX-alien_icon.get_width())))
         enemyY.append(random.randint(50, 150))
-        enemyX_co.append(1/(LPF/SF**2))
+        enemyX_co.append(1/((LPF/SF**2)/(math.sqrt(1/SQLP))))
         enemyY_co.append(alien_icon.get_height())
     # bullet
     bulletX = 0
     bulletY = (screen.get_height()-170)
     bulletX_co = 0
-    bulletY_co = (6/LPF)
+    bulletY_co = ((6/(LPF**1.5))*(SF**3))
     bullet_state = 'reload'
 
 #immediately runs that because it is the start of the game 
@@ -105,7 +106,7 @@ def enemy(x, y, i):
 def fire_bullet(x, y):
     global bullet_state
     bullet_state = 'fire'
-    screen.blit(bullet_icon, (x + 32, y + 10))
+    screen.blit(bullet_icon, (x+(player_icon.get_width()/2)-(bullet_icon.get_width()/2), y-(player_icon.get_height()/4)))
 
 #Bullet collision function
 def isCollision(enemyX, enemyY, bulletX, bulletY):
